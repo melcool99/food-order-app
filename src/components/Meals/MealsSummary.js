@@ -5,8 +5,8 @@ const MealsSummary = () => {
     return (
         <section className={classes.summary} >
             <h2>Delicious Food, Delivered to you</h2>
-            <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Mollitia, quasi.</p>
-            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dignissimos, earum?</p>
+            <p>Order now to get the ultimate taste experience!</p>
+            <p>For orders grater than 100$ the delivery fees are free</p>
         </section>
     )
 }
