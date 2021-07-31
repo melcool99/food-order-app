@@ -9,7 +9,9 @@ import useFetch from "../hooks/useFetch";
 
 const Cart = (props) => {
   const [order, setOrder] = useState(false);
-  const {handleRequests:sendRequests} =useFetch()
+  const [orderSubmiting, setOrderSubmiting] = useState(false);
+  const [orderSubmited, setOrderSubmited] = useState(false);
+  const { handleRequests: sendRequests } = useFetch();
 
   const cartCtx = useContext(CartContext);
   const totalAmount = cartCtx.totalAmount.toFixed(2);
@@ -27,15 +29,18 @@ const Cart = (props) => {
     setOrder(!order);
   };
 
-
   const submitOrderHandler = (userData) => {
-    sendRequests({url: `https://react-http-a3776-default-rtdb.europe-west1.firebasedatabase.app/orders.json`,
-    method:'POST',
-    body:{user: userData,
-    orderedItems:cartCtx.items} })
-      
-    }    
+    setOrderSubmiting(true);
+    sendRequests({
+      url: `https://react-http-a3776-default-rtdb.europe-west1.firebasedatabase.app/orders.json`,
+      method: "POST",
+      body: { user: userData, orderedItems: cartCtx.items },
+    });
 
+    setOrderSubmiting(false);
+    setOrderSubmited(true);
+    cartCtx.clearCart()
+  };
 
   const cartItems = (
     <ul className={classes["cart-items"]}>
@@ -54,7 +59,7 @@ const Cart = (props) => {
 
   const modalActions = (
     <div className={classes.actions}>
-      {hasItems &&<button onClick={showOrderForm}>Order</button>}
+      {hasItems && <button onClick={showOrderForm}>Order</button>}
       <button
         className={classes["button--alt"]}
         onClick={props.hideCartHandler}
@@ -64,15 +69,41 @@ const Cart = (props) => {
     </div>
   );
 
-  return (
-    <Modal hideCartHandler={props.hideCartHandler}>
+  const ModalView = (
+    <React.Fragment>
       {cartItems}
       <div className={classes.total}>
         <span>total amount</span>
         <span>{totalAmount}</span>
       </div>
-      {order && <CheckoutForm onCancel = {props.hideCartHandler} cartItems={cartItems} onConfirmOrder={submitOrderHandler} />}
+      {order && (
+        <CheckoutForm
+          onCancel={props.hideCartHandler}
+          cartItems={cartItems}
+          onConfirmOrder={submitOrderHandler}
+        />
+      )}
       {!order && modalActions}
+    </React.Fragment>
+  );
+
+  const isSubmittingModalContent = <p>Sending order data...</p>;
+  const didSubmitModalContent = (
+    <React.Fragment>
+      <p>Successfully sent the order!</p>
+      <div className={classes.actions}>
+        <button className={classes.button} onClick={props.hideCartHandler}>
+          Close
+        </button>
+      </div>
+    </React.Fragment>
+  );
+
+  return (
+    <Modal hideCartHandler={props.hideCartHandler}>
+      {!orderSubmiting && !orderSubmited && ModalView}
+      {orderSubmiting && isSubmittingModalContent}
+      {orderSubmited && didSubmitModalContent}
     </Modal>
   );
 };
